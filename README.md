@@ -32,6 +32,20 @@ python run.py
 
 啟動後開啟 http://localhost:8000
 
+## 使用範例
+
+1. 開啟網頁，會看到搜尋框和 Search 按鈕
+
+   ![首頁](docs/screenshots/01-home.jpg)
+
+2. 在搜尋框輸入關鍵字（例如 `mountain`）
+
+   ![輸入關鍵字](docs/screenshots/02-type-keyword.jpg)
+
+3. 按下 Search，稍等一下就會顯示搜尋結果，每張圖下方附有攝影師署名連結
+
+   ![搜尋結果](docs/screenshots/03-results.jpg)
+
 ## 技術細節
 
 後端只用 Python 標準庫（`http.server`、`urllib`），不需要另外安裝套件。
