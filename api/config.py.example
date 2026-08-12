@@ -1,0 +1,4 @@
+# Unsplash API 設定
+# 到 https://unsplash.com/developers 申請一組 Access Key，貼到下面
+# 複製這個檔案為 config.py，再填入你自己的 Key
+UNSPLASH_ACCESS_KEY = 'YOUR_UNSPLASH_ACCESS_KEY'

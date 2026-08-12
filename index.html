@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Search</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    #prompt {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007cba;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005a87;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #result {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .photo-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: block;
+    }
+    .photo-card small {
+      display: block;
+      margin-top: 4px;
+      color: #666;
+    }
+    .photo-card small a {
+      color: #666;
+    }
+    .error {
+      color: red;
+      background-color: #fff5f5;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #fed7d7;
+    }
+    .loading {
+      color: #666;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Search</h1>
+  <input type="text" id="prompt" placeholder="Enter a search keyword" />
+  <button onclick="searchImages()">Search</button>
+  <div id="result"></div>
+
+  <script>
+    async function searchImages() {
+      const query = document.getElementById('prompt').value.trim();
+      const button = document.querySelector('button');
+      const resultDiv = document.getElementById('result');
+
+      // Validate input
+      if (!query) {
+        resultDiv.innerHTML = '<p class="error">請先輸入關鍵字。</p>';
+        return;
+      }
+
+      // Disable button and show loading
+      button.disabled = true;
+      button.textContent = 'Searching...';
+      resultDiv.innerHTML = '<p class="loading">搜尋圖片中，請稍候...</p>';
+
+      try {
+        const response = await fetch("/api/search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: `query=${encodeURIComponent(query)}`
+        });
+
+        const data = await response.json();
+        console.log("API Response:", data);
+
+        // Check for API errors
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Check if results exist
+        if (!data.results || data.results.length === 0) {
+          resultDiv.innerHTML = '<p class="error">找不到符合的圖片，換個關鍵字試試。</p>';
+          return;
+        }
+
+        // Display the search results
+        resultDiv.innerHTML = data.results.map(photo => `
+          <div class="photo-card">
+            <img src="${photo.thumbUrl}" alt="${photo.alt || query}" />
+            <small>攝影師：<a href="${photo.authorUrl}" target="_blank" rel="noopener">${photo.author}</a></small>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        console.error("Error: ", error);
+        resultDiv.innerHTML = `<p class="error">搜尋失敗：${error.message}</p>`;
+      } finally {
+        // Re-enable button
+        button.disabled = false;
+        button.textContent = 'Search';
+      }
+    }
+
+    // Allow Enter key to trigger search
+    document.getElementById('prompt').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        searchImages();
+      }
+    });
+  </script>
+</body>
+</html>
