@@ -9,7 +9,6 @@
       max-width: 800px;
       margin: 0 auto;
       padding: 20px;
-      padding-bottom: 90px;
     }
     #prompt {
       width: 100%;
@@ -66,66 +65,6 @@
       color: #666;
       font-style: italic;
     }
-    #chatMessages {
-      margin: 10px 0;
-      max-height: 400px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .chat-bubble {
-      max-width: 75%;
-      padding: 8px 12px;
-      border-radius: 12px;
-      line-height: 1.4;
-      white-space: pre-wrap;
-    }
-    .chat-bubble.user {
-      align-self: flex-end;
-      background-color: #007cba;
-      color: white;
-      border-bottom-right-radius: 2px;
-    }
-    .chat-bubble.assistant {
-      align-self: flex-start;
-      background-color: #f1f1f1;
-      color: #222;
-      border-bottom-left-radius: 2px;
-    }
-    .chat-bubble.error {
-      background-color: #fff5f5;
-      color: red;
-      border: 1px solid #fed7d7;
-    }
-    .chat-input-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      border-top: 1px solid #ddd;
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
-      padding: 12px 20px;
-      z-index: 10;
-    }
-    .chat-input-bar-inner {
-      max-width: 800px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .chat-label {
-      font-weight: bold;
-      white-space: nowrap;
-    }
-    #chatInput {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
   </style>
 </head>
 <body>
@@ -133,16 +72,6 @@
   <input type="text" id="prompt" placeholder="Enter a search keyword" />
   <button onclick="searchImages()">Search</button>
   <div id="result"></div>
-
-  <div id="chatMessages"></div>
-
-  <div class="chat-input-bar">
-    <div class="chat-input-bar-inner">
-      <span class="chat-label">AI Chat</span>
-      <input type="text" id="chatInput" placeholder="Type a message..." />
-      <button id="chatButton" onclick="sendChat()">Send</button>
-    </div>
-  </div>
 
   <script>
     async function searchImages() {
@@ -206,76 +135,6 @@
     document.getElementById('prompt').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         searchImages();
-      }
-    });
-
-    let chatHistory = [];
-
-    function appendBubble(role, text) {
-      const chatMessages = document.getElementById('chatMessages');
-      const bubble = document.createElement('div');
-      bubble.className = `chat-bubble ${role}`;
-      bubble.textContent = text;
-      chatMessages.appendChild(bubble);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      return bubble;
-    }
-
-    async function sendChat() {
-      const chatInput = document.getElementById('chatInput');
-      const chatButton = document.getElementById('chatButton');
-      const message = chatInput.value.trim();
-
-      if (!message) return;
-
-      chatInput.value = '';
-      chatButton.disabled = true;
-      chatButton.textContent = 'Sending...';
-
-      chatHistory.push({ role: 'user', content: message });
-      appendBubble('user', message);
-      const assistantBubble = appendBubble('assistant', '');
-
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: chatHistory })
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || `HTTP ${response.status}`);
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let assistantReply = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          assistantReply += decoder.decode(value, { stream: true });
-          assistantBubble.textContent = assistantReply;
-          document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
-        }
-
-        chatHistory.push({ role: 'assistant', content: assistantReply });
-
-      } catch (error) {
-        console.error('Error: ', error);
-        assistantBubble.classList.add('error');
-        assistantBubble.textContent = `Chat failed: ${error.message}`;
-        chatHistory.pop(); // remove the user message so retry doesn't duplicate context on failure
-      } finally {
-        chatButton.disabled = false;
-        chatButton.textContent = 'Send';
-      }
-    }
-
-    document.getElementById('chatInput').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        sendChat();
       }
     });
   </script>
