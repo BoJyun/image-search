@@ -47,10 +47,14 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(404)
 
     def do_POST(self):
-        if self.path != '/api/search':
+        if self.path == '/api/search':
+            self._handle_search()
+        elif self.path == '/api/chat':
+            self._handle_chat()
+        else:
             self.send_error(404)
-            return
 
+    def _handle_search(self):
         length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(length).decode('utf-8')
         params = urllib.parse.parse_qs(body)
@@ -86,6 +90,17 @@ class Handler(BaseHTTPRequestHandler):
         } for photo in data.get('results', [])]
 
         self._send_json(200, {'results': results})
+
+    def _handle_chat(self):
+        length = int(self.headers.get('Content-Length', 0))
+        self.rfile.read(length)
+
+        body = 'AI 尚未線上'.encode('utf-8')
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/plain; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def log_message(self, format, *args):
         print(f"{self.address_string()} - {format % args}")

@@ -1,16 +1,16 @@
 # Image Search
 
-輸入關鍵字搜尋圖片的小網站，前端串接一個輕量 Python 後端，後端再呼叫 [Unsplash API](https://unsplash.com/developers) 取得搜尋結果。
+輸入關鍵字搜尋圖片的小網站，前端串接一個輕量 Python 後端，後端再呼叫 [Unsplash API](https://unsplash.com/developers) 取得搜尋結果。另外有一個 AI 聊天欄位，目前固定回覆「AI 尚未線上」。
 
 ## 專案結構
 
 ```
 /
-├── index.html          前端頁面
+├── index.html          前端頁面（含圖片搜尋 + AI 聊天）
 ├── run.py               啟動伺服器的進入點
 └── api/
     ├── config.py.example  Unsplash Access Key 設定範本
-    └── handler.py          路由處理 + 搜尋邏輯
+    └── handler.py          路由處理：/api/search、/api/chat
 ```
 
 ## 使用前準備
@@ -48,4 +48,4 @@ python run.py
 
 ## 技術細節
 
-後端只用 Python 標準庫（`http.server`、`urllib`），不需要另外安裝套件。
+後端只用 Python 標準庫（`http.server`、`urllib`），不需要另外安裝套件。AI 聊天欄位目前是預留功能，尚未串接真正的 AI 服務。
